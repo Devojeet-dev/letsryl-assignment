@@ -124,10 +124,15 @@ npm run dev:worker:report# report-generation worker (separate terminal)
 ```
 
 Useful backend scripts:
+- `npm run dev` — API on `http://localhost:4000`
+- `npm run dev:combined` — Combined API + file worker + report worker in a single process
+- `npm run dev:worker` — Standalone file-processing worker
+- `npm run dev:worker:report` — Standalone report-generation worker
 - `npm run typecheck` — Strict TypeScript checking
 - `npm test` — Run all 53 Vitest unit tests across 8 suites
 - `npm run build` — Compile TypeScript to `dist/`
 - `npm start` — Run production server from `dist/`
+- `npm run start:combined` — Run consolidated production API + workers from `dist/`
 
 ### 2. Frontend
 
@@ -146,19 +151,40 @@ Useful frontend scripts:
 
 ## Deployment on Render
 
-Both `backend/` and `frontend/` are independent services designed for frictionless deployment on Render:
+### Option A: One-Click Blueprint Deployment (Recommended)
 
-### 1. Database & Queue Setup
+The repository includes a root [`render.yaml`](render.yaml) Blueprint that provisions the complete stack automatically with zero manual wiring:
+- **`bfdp-frontend`**: Static Site with SPA rewrites (`/*` -> `/index.html`) and automatic `VITE_API_URL` binding to the backend.
+- **`bfdp-api`**: Consolidated Node.js Web Service running Express API + file worker + report worker together via `start:combined` to fit in a single web service tier and eliminate background worker fees.
+- **`bfdp-redis`**: Managed Render Key Value (Redis) store for BullMQ and rate limiting.
+
+**Steps to deploy:**
+1. Push this repository to GitHub or GitLab.
+2. Ensure you have a free **M0 Cluster** on [MongoDB Atlas](https://www.mongodb.com/atlas) with Network Access set to `0.0.0.0/0`.
+3. In Render, select **New +** > **Blueprint**.
+4. Connect your repository. Render detects `render.yaml` and displays the service plan.
+5. Render prompts for the uncommitted parameters:
+   - `MONGODB_URI`: Paste your MongoDB Atlas connection string.
+   - `CORS_ORIGINS`: Set to your frontend URL (e.g. `https://bfdp-frontend.onrender.com`).
+6. Click **Apply**. Render automatically provisions Redis, compiles the backend and frontend, and launches the application.
+
+---
+
+### Option B: Manual Service Configuration
+
+If you prefer to configure services individually in the Render UI:
+
+#### 1. Database & Queue Setup
 - **MongoDB**: Create a free **M0 Cluster** on [MongoDB Atlas](https://www.mongodb.com/atlas) (512 MB free storage). Set Network Access to `0.0.0.0/0` and copy your connection string.
 - **Redis**: Create a free instance on [Upstash](https://upstash.com/) or [Redis Cloud](https://redis.io/cloud/) (using TCP `rediss://...` endpoint), or a Render Redis instance.
 
-### 2. Deploy Backend (Render Web Service)
+#### 2. Deploy Backend (Render Web Service)
 1. In Render, select **New +** > **Web Service** and connect your repository.
 2. Configure settings:
    - **Root Directory**: `backend`
    - **Runtime**: `Node`
    - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `node dist/main.api.js`
+   - **Start Command**: `npm run start:combined` (or `node dist/main.api.js` for standalone API)
    - **Health Check Path**: `/health`
 3. Add Environment Variables:
    - `NODE_ENV`: `production`
@@ -168,11 +194,12 @@ Both `backend/` and `frontend/` are independent services designed for frictionle
    - `DEMO_AUTH_ENABLED`: `true` (or configure Supabase)
    - `APP_JWT_SECRET`: Random string (≥ 32 chars)
 
-### 3. Deploy Workers (Render Background Worker)
-- **File Worker**: Same repo, Root Directory `backend`, Start Command: `node dist/main.worker.file.js`
-- **Report Worker**: Same repo, Root Directory `backend`, Start Command: `node dist/main.worker.report.js`
+#### 3. Deploy Standalone Workers (Optional for Multi-Instance Scaling)
+If scaling file and report workers into dedicated background instances:
+- **File Worker**: Root Directory `backend`, Start Command: `node dist/main.worker.file.js`
+- **Report Worker**: Root Directory `backend`, Start Command: `node dist/main.worker.report.js`
 
-### 4. Deploy Frontend (Render Static Site — 100% Free)
+#### 4. Deploy Frontend (Render Static Site — 100% Free)
 1. Select **New +** > **Static Site** and connect your repository.
 2. Configure settings:
    - **Root Directory**: `frontend`
@@ -314,6 +341,7 @@ scripts/               Smoke test and sample report generator
 docs/                  Architecture, API, analysis, limits, security, ADRs
 SumitAssignment/       Assignment brief PDF and test datasets (20 CSV files)
 docker-compose.yml     Local development container stack
+render.yaml            Single-click multi-service deployment Blueprint for Render
 ```
 
 ---

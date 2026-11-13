@@ -6,11 +6,13 @@
   "main": "dist/main.api.js",
   "scripts": {
     "dev": "tsx watch src/main.api.ts",
+    "dev:combined": "tsx watch src/main.combined.ts",
     "dev:worker": "tsx watch src/main.worker.file.ts",
     "dev:worker:report": "tsx watch src/main.worker.report.ts",
     "build": "tsc -b tsconfig.json",
     "typecheck": "tsc -b tsconfig.json",
     "start": "node dist/main.api.js",
+    "start:combined": "node dist/main.combined.js",
     "start:worker": "node dist/main.worker.file.js",
     "start:worker:report": "node dist/main.worker.report.js",
     "test": "vitest run",

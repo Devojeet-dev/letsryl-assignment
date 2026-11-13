@@ -17,14 +17,17 @@ export interface WorkerRuntimeOptions {
   processor: Processor;
 }
 
-/**
- * Boots a standalone worker process: its own Redis connection (BullMQ requires
- * blocking connections to be exclusive), Mongo access, a heartbeat visible to
- * /ready, and graceful drain on SIGTERM.
- */
-export async function runWorker(options: WorkerRuntimeOptions): Promise<void> {
-  await connectMongo();
+export interface ActiveWorker {
+  worker: Worker;
+  connection: ReturnType<typeof createRedisConnection>;
+  stop: () => Promise<void>;
+}
 
+/**
+ * Creates and starts a BullMQ worker instance with its dedicated Redis connection,
+ * periodic heartbeats for /ready checks, and an idempotent stop handler.
+ */
+export async function createWorkerInstance(options: WorkerRuntimeOptions): Promise<ActiveWorker> {
   const workerId = `${options.name}-${process.pid}`;
   const connection = createRedisConnection();
   const worker = new Worker(options.queueName, options.processor, {
@@ -62,6 +65,24 @@ export async function runWorker(options: WorkerRuntimeOptions): Promise<void> {
     'worker.started',
   );
 
+  const stop = async (): Promise<void> => {
+    clearInterval(heartbeat);
+    await worker.close();
+    await connection.quit().catch(() => connection.disconnect());
+  };
+
+  return { worker, connection, stop };
+}
+
+/**
+ * Boots a standalone worker process: its own Redis connection (BullMQ requires
+ * blocking connections to be exclusive), Mongo access, a heartbeat visible to
+ * /ready, and graceful drain on SIGTERM.
+ */
+export async function runWorker(options: WorkerRuntimeOptions): Promise<void> {
+  await connectMongo();
+  const instance = await createWorkerInstance(options);
+
   let shuttingDown = false;
   const shutdown = async (signal: string): Promise<void> => {
     if (shuttingDown) return;
@@ -74,11 +95,9 @@ export async function runWorker(options: WorkerRuntimeOptions): Promise<void> {
     }, 20_000);
     forceExit.unref();
 
-    clearInterval(heartbeat);
-    await worker.close();
+    await instance.stop();
     await Promise.allSettled([
       closeQueues(),
-      connection.quit().catch(() => connection.disconnect()),
       closeGridFs(),
       disconnectMongo(),
     ]);
