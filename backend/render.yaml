@@ -11,10 +11,12 @@ services:
     plan: free
     runtime: node
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm run start:combined
     healthCheckPath: /health
     envVars:
+      - key: NODE_VERSION
+        value: 20
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
