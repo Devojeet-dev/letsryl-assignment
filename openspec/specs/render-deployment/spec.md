@@ -20,9 +20,9 @@ The project SHALL provide a root `render.yaml` specification that defines a stat
 - **WHEN** Render evaluates `render.yaml` for the backend service
 - **THEN** it SHALL set `rootDir: backend`, `runtime: node`, `buildCommand: npm install && npm run build`, `startCommand: npm run start:combined`, and configure a health check at `/health`
 
-#### Scenario: Blueprint provisions managed Redis
-- **WHEN** Render provisions services declared in `render.yaml`
-- **THEN** it SHALL provision a managed Redis datastore and inject its connection string into `REDIS_URL` for the backend service
+#### Scenario: Blueprint configures external Redis
+- **WHEN** Render evaluates `render.yaml` for the backend service
+- **THEN** it SHALL configure `REDIS_URL` with `sync: false` to prompt for an external free Redis connection string (e.g. Upstash)
 
 ### Requirement: Consolidated Backend Execution
 The backend service SHALL provide a unified entry point and npm script that boots the Express API, the file-processing BullMQ worker, and the report-generation BullMQ worker in a single process with unified lifecycle handling.

@@ -1,13 +1,13 @@
 # -----------------------------------------------------------------------------
 # Render Blueprint (Infrastructure as Code)
-# One-click deployment for Batch Financial Data Processor (BFDP)
+# One-click 100% Free deployment for Batch Financial Data Processor (BFDP)
 # https://render.com/docs/blueprint-spec
 # -----------------------------------------------------------------------------
 version: "1"
 
 services:
   # ---------------------------------------------------------------------------
-  # 1. Frontend: React 18 + Vite SPA (Render Static Site)
+  # 1. Frontend: React 18 + Vite SPA (Render Static Site - 100% Free)
   # ---------------------------------------------------------------------------
   - type: web
     name: bfdp-frontend
@@ -21,15 +21,16 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        sync: false # Set in Render UI: your backend URL (e.g. https://bfdp-api.onrender.com)
+        sync: false # Prompt in Render UI: your backend URL (e.g. https://bfdp-api.onrender.com)
 
   # ---------------------------------------------------------------------------
   # 2. Backend: Consolidated Express API + BullMQ Workers (Render Web Service)
   # Runs the Express HTTP API, file worker, and report worker concurrently in
-  # a single process to minimize compute and instance costs.
+  # a single process on Render's 100% Free plan ($0/mo, no payment method required).
   # ---------------------------------------------------------------------------
   - type: web
     name: bfdp-api
+    plan: free
     runtime: node
     rootDir: backend
     buildCommand: npm install && npm run build
@@ -39,27 +40,14 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        sync: false # Set in Render UI: paste your MongoDB Atlas connection string
+        sync: false # Prompt in Render UI: paste your free MongoDB Atlas connection string
       - key: MONGODB_DB
         value: bfdp
       - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: bfdp-redis
-          property: connectionString
+        sync: false # Prompt in Render UI: paste your free Upstash Redis URL (rediss://...)
       - key: APP_JWT_SECRET
         generateValue: true # Render automatically generates a secure 32+ char secret
       - key: DEMO_AUTH_ENABLED
         value: "true"
       - key: CORS_ORIGINS
-        sync: false # Set in Render UI: frontend URL (e.g. https://bfdp-frontend.onrender.com)
-
-  # ---------------------------------------------------------------------------
-  # 3. Redis: Managed Key Value Store for BullMQ Queues & Rate Limiting
-  # ---------------------------------------------------------------------------
-  - type: keyvalue
-    name: bfdp-redis
-    plan: starter
-    maxmemoryPolicy: noeviction
-    ipAllowList: [] # Restricts access to internal Render network
-
+        sync: false # Prompt in Render UI: frontend URL (e.g. https://bfdp-frontend.onrender.com)
