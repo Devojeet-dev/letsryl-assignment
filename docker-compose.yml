@@ -1,0 +1,121 @@
+name: bfdp
+
+x-api-env: &api-env
+  NODE_ENV: ${NODE_ENV:-production}
+  PORT: "4000"
+  SERVICE_VERSION: ${SERVICE_VERSION:-0.1.0}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+  MONGODB_URI: mongodb://mongo:27017/bfdp
+  MONGODB_DB: ${MONGODB_DB:-bfdp}
+  REDIS_URL: redis://redis:6379
+
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+  SUPABASE_URL: ${SUPABASE_URL:-}
+  SUPABASE_JWKS_URL: ${SUPABASE_JWKS_URL:-}
+  SUPABASE_JWT_AUDIENCE: ${SUPABASE_JWT_AUDIENCE:-authenticated}
+  SUPABASE_JWT_ISSUER: ${SUPABASE_JWT_ISSUER:-}
+  GOOGLE_CLIENT_IDS: ${GOOGLE_CLIENT_IDS:-}
+  APP_JWT_SECRET: ${APP_JWT_SECRET:-dev-only-insecure-jwt-secret-change-me-0001}
+  APP_JWT_TTL_SECONDS: ${APP_JWT_TTL_SECONDS:-3600}
+  DEMO_AUTH_ENABLED: ${DEMO_AUTH_ENABLED:-true}
+
+  UPLOAD_BUCKET: ${UPLOAD_BUCKET:-uploads}
+  REPORT_BUCKET: ${REPORT_BUCKET:-reports}
+  REPORT_CACHE_TTL_SECONDS: ${REPORT_CACHE_TTL_SECONDS:-86400}
+
+  QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY:-2}
+  QUEUE_MAX_DEPTH: ${QUEUE_MAX_DEPTH:-5000}
+  RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+  RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-60}
+
+x-api-base: &api-base
+  image: bfdp-api:local
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  depends_on:
+    mongo:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--quiet"]
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  api:
+    <<: *api-base
+    environment: *api-env
+    ports:
+      - "${API_PORT:-4000}:4000"
+
+  worker-file:
+    <<: *api-base
+    environment: *api-env
+    command: ["node", "dist/main.worker.file.js"]
+    healthcheck:
+      disable: true
+
+  worker-report:
+    <<: *api-base
+    environment: *api-env
+    command: ["node", "dist/main.worker.report.js"]
+    healthcheck:
+      disable: true
+
+  web:
+    image: bfdp-web:local
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ""
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "${WEB_PORT:-5173}:8080"
+
+volumes:
+  mongo-data:
+  redis-data:
+

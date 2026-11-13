@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+!.env.example
+.DS_Store
+*.log
+.turbo/
+.vite/
+playwright-report/
+test-results/
+samples/reports/*.xlsx
+!samples/reports/sample-report.xlsx

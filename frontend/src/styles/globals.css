@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-zinc-100;
+  }
+
+  ::selection {
+    @apply bg-brand/30 text-white;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-edge bg-panel shadow-panel;
+  }
+
+  .panel-header {
+    @apply flex items-center justify-between gap-3 border-b border-edge px-5 py-3.5;
+  }
+
+  .panel-title {
+    @apply text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-[11px] font-mono font-medium uppercase tracking-wider text-zinc-400;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-edge bg-[#141414] px-3 py-2 text-sm text-zinc-100 outline-none transition focus:border-brand focus:ring-1 focus:ring-brand/40 placeholder:text-zinc-600;
+  }
+
+  .table-base {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .table-base thead th {
+    @apply border-b border-edge px-3.5 py-2.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-zinc-400 bg-[#151515];
+  }
+
+  .table-base tbody td {
+    @apply border-b border-edge/60 px-3.5 py-2.5 align-middle text-zinc-300;
+  }
+
+  .table-base tbody tr:hover td {
+    @apply bg-white/[0.02] text-zinc-100;
+  }
+}
+
+/* Scrollbars tuned for the Supabase dark shell. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2e2e2e transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #2e2e2e;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #3e3e3e;
+}
