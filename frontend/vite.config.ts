@@ -9,11 +9,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      // Consume the workspace package from source so the SPA and the API share
-      // one definition of every schema, status and domain type.
-      '@bfdp/shared': fileURLToPath(
-        new URL('../../packages/shared/src/index.ts', import.meta.url),
-      ),
     },
   },
   server: {

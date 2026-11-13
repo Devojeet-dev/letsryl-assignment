@@ -46,3 +46,4 @@ describe('envSchema REDIS_URL sanitization', () => {
     expect(parsed.REDIS_URL).toBe('rediss://default:secret@endpoint.upstash.io:6379');
   });
 });
+
