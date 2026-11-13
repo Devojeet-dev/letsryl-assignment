@@ -31,4 +31,7 @@ services:
         value: "true"
       - key: CORS_ORIGINS
         value: "*" # Accepts requests from any frontend domain
+      - key: SUPABASE_URL
+        value: "https://rontttitazrisfxbyqfs.supabase.co"
+
 
