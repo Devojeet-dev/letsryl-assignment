@@ -33,7 +33,20 @@ export const envSchema = z.object({
 
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   MONGODB_DB: z.string().default('bfdp'),
-  REDIS_URL: z.string().min(1, 'REDIS_URL is required'),
+  REDIS_URL: z
+    .string()
+    .min(1, 'REDIS_URL is required')
+    .transform((val) => {
+      let cleaned = val.trim().replace(/^["']|["']$/g, '');
+      const lastRedisIdx = Math.max(cleaned.lastIndexOf('rediss://'), cleaned.lastIndexOf('redis://'));
+      if (lastRedisIdx > 0) {
+        cleaned = cleaned.slice(lastRedisIdx);
+      }
+      if (val.includes('--tls') && cleaned.startsWith('redis://')) {
+        cleaned = 'rediss://' + cleaned.slice('redis://'.length);
+      }
+      return cleaned;
+    }),
 
   SUPABASE_URL: optional(z.string().url()),
   SUPABASE_JWKS_URL: optional(z.string().url()),
