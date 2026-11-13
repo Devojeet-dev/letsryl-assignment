@@ -87,6 +87,21 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
         return;
       }
 
+      // Check URL hash directly for OAuth callback access_token
+      if (typeof window !== 'undefined' && window.location.hash.includes('access_token=')) {
+        try {
+          const hashParams = new URLSearchParams(window.location.hash.slice(1));
+          const hashToken = hashParams.get('access_token');
+          if (hashToken) {
+            await signInWithToken(hashToken);
+            window.history.replaceState(null, '', window.location.pathname);
+            return;
+          }
+        } catch {
+          // continue to getSession fallback
+        }
+      }
+
       // Returning from the Supabase OAuth redirect: exchange its access token
       // for the API session (the API accepts Supabase JWTs directly).
       if (supabase) {
@@ -110,6 +125,22 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     });
   }, [applySession, signInWithToken]);
 
+  useEffect(() => {
+    if (!supabase) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sbSession) => {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && sbSession?.access_token) {
+        try {
+          await signInWithToken(sbSession.access_token);
+        } catch {
+          // Handled in bootstrap
+        }
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [signInWithToken]);
+
   const signInWithGoogle = useCallback(async () => {
     setError(null);
     if (!supabase) {
@@ -118,9 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       );
       return;
     }
+    const redirectUrl = `${window.location.origin}/`;
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: redirectUrl },
     });
     if (oauthError) {
       setError(oauthError.message);
