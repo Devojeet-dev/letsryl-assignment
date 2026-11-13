@@ -13,8 +13,8 @@ The project SHALL provide a root `render.yaml` specification that defines a stat
 - **THEN** it SHALL set `rootDir: frontend`, `runtime: static`, `buildCommand: npm install && npm run build`, `staticPublishPath: dist`, and rewrite all routes to `/index.html`
 
 #### Scenario: Blueprint links API URL to frontend
-- **WHEN** Render builds the frontend static site
-- **THEN** it SHALL inject the public URL of the backend web service into `VITE_API_URL` using `fromService`
+- **WHEN** Render evaluates `render.yaml` for the frontend static site
+- **THEN** it SHALL configure `VITE_API_URL` with `sync: false` to prompt for the backend web service URL
 
 #### Scenario: Blueprint defines consolidated backend web service
 - **WHEN** Render evaluates `render.yaml` for the backend service

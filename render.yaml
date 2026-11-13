@@ -21,10 +21,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: bfdp-api
-          property: url
+        sync: false # Set in Render UI: your backend URL (e.g. https://bfdp-api.onrender.com)
 
   # ---------------------------------------------------------------------------
   # 2. Backend: Consolidated Express API + BullMQ Workers (Render Web Service)
