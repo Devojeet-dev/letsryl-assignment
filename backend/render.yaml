@@ -1,0 +1,32 @@
+# -----------------------------------------------------------------------------
+# Render Blueprint (Infrastructure as Code) - Backend Service
+# 100% Free deployment for Batch Financial Data Processor (BFDP) Backend API
+# https://render.com/docs/blueprint-spec
+# -----------------------------------------------------------------------------
+version: "1"
+
+services:
+  - type: web
+    name: bfdp-api
+    plan: free
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:combined
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set in Render UI: paste your free MongoDB Atlas connection string
+      - key: MONGODB_DB
+        value: bfdp
+      - key: REDIS_URL
+        sync: false # Set in Render UI: paste your free Upstash Redis URL (rediss://...)
+      - key: APP_JWT_SECRET
+        generateValue: true # Render automatically generates a secure 32+ char secret
+      - key: DEMO_AUTH_ENABLED
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "*" # Accepts requests from any frontend domain
+

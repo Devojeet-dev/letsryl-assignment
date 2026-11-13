@@ -151,22 +151,28 @@ Useful frontend scripts:
 
 ## Deployment on Render
 
-### Option A: One-Click Blueprint Deployment (Recommended)
+### Option A: Independent Blueprint Deployment (100% Free, Recommended)
 
-The repository includes a root [`render.yaml`](render.yaml) Blueprint that provisions the complete stack automatically with zero manual wiring:
-- **`bfdp-frontend`**: Static Site with SPA rewrites (`/*` -> `/index.html`) and automatic `VITE_API_URL` binding to the backend.
-- **`bfdp-api`**: Consolidated Node.js Web Service running Express API + file worker + report worker together via `start:combined` to fit in a single web service tier and eliminate background worker fees.
-- **`bfdp-redis`**: Managed Render Key Value (Redis) store for BullMQ and rate limiting.
+The repository provides two separate Blueprints so the backend and frontend can be deployed independently without circular URL dependencies or payment methods:
 
-**Steps to deploy:**
-1. Push this repository to GitHub or GitLab.
-2. Ensure you have a free **M0 Cluster** on [MongoDB Atlas](https://www.mongodb.com/atlas) with Network Access set to `0.0.0.0/0`.
-3. In Render, select **New +** > **Blueprint**.
-4. Connect your repository. Render detects `render.yaml` and displays the service plan.
-5. Render prompts for the uncommitted parameters:
-   - `MONGODB_URI`: Paste your MongoDB Atlas connection string.
-   - `CORS_ORIGINS`: Set to your frontend URL (e.g. `https://bfdp-frontend.onrender.com`).
-6. Click **Apply**. Render automatically provisions Redis, compiles the backend and frontend, and launches the application.
+#### Step 1: Deploy Backend (`backend/render.yaml`)
+1. In Render, select **New +** > **Blueprint**.
+2. Connect your repository: `Devojeet-dev/letsryl-assignment`.
+3. In **Blueprint Path**, enter: `backend/render.yaml`.
+4. Render prompts for your free credentials:
+   - `MONGODB_URI`: Paste your free MongoDB Atlas connection string.
+   - `REDIS_URL`: Paste your free Upstash Redis URL (`rediss://...`).
+5. Click **Apply**.
+6. Once deployed, note the backend public URL (e.g. `https://bfdp-api-xxxx.onrender.com`).
+
+#### Step 2: Deploy Frontend (`frontend/render.yaml`)
+1. In Render, select **New +** > **Blueprint**.
+2. Connect your repository: `Devojeet-dev/letsryl-assignment`.
+3. In **Blueprint Path**, enter: `frontend/render.yaml`.
+4. Render prompts for:
+   - `VITE_API_URL`: Paste the live backend URL from Step 1 (e.g. `https://bfdp-api-xxxx.onrender.com`).
+5. Click **Apply**.
+6. Open your live frontend app!
 
 ---
 
@@ -341,7 +347,8 @@ scripts/               Smoke test and sample report generator
 docs/                  Architecture, API, analysis, limits, security, ADRs
 SumitAssignment/       Assignment brief PDF and test datasets (20 CSV files)
 docker-compose.yml     Local development container stack
-render.yaml            Single-click multi-service deployment Blueprint for Render
+backend/render.yaml    Backend service deployment Blueprint for Render
+frontend/render.yaml   Frontend static site deployment Blueprint for Render
 ```
 
 ---
