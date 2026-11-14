@@ -150,25 +150,18 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       subscription.unsubscribe();
     };
   }, [signInWithToken]);
-  
-const signInWithGoogle = useCallback(async () => {
+
+ const signInWithGoogle = useCallback(async () => {
   setError(null);
 
   if (!supabase) {
-    setError(
-      'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
-    );
+    setError('Supabase is not configured.');
     return;
   }
 
-  const redirectUrl =
-    import.meta.env.VITE_AUTH_REDIRECT_URL ||
-    window.location.origin;
+  const redirectUrl = window.location.origin;
 
-  console.log('OAuth Configuration:', {
-    origin: window.location.origin,
-    redirectUrl,
-  });
+  console.log('OAuth redirect:', redirectUrl);
 
   const { error: oauthError } = await supabase.auth.signInWithOAuth({
     provider: 'google',
