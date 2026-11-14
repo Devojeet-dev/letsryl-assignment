@@ -150,7 +150,6 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       subscription.unsubscribe();
     };
   }, [signInWithToken]);
-
   const signInWithGoogle = useCallback(async () => {
     setError(null);
     if (!supabase) {
@@ -161,8 +160,10 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     }
     // Clean origin without trailing slash matching standard Supabase redirect whitelist
     const redirectUrl =
-      (import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined)
-
+      (import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined) ||
+      window.location.origin;
+    console.log('OAuth redirect URL:', redirectUrl);
+    console.log('Current origin:', window.location.origin);
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
