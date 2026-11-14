@@ -29,9 +29,6 @@ and a standalone **React 18 + Vite dashboard** (`frontend/`), fully decoupled fo
 - [Architecture](#architecture)
 - [Quick start (Docker)](#quick-start-docker)
 - [Local development](#local-development)
-- [Deployment on Render](#deployment-on-render)
-- [Configuration](#configuration)
-- [API](#api)
 - [Processing semantics](#processing-semantics)
 - [Excel report](#excel-report)
 - [Tests](#tests)
@@ -257,4 +254,3 @@ frontend/render.yaml   Frontend static site deployment Blueprint for Render
 - [Analysis specification](docs/analysis-spec.md) — metric definitions and edge cases
 - [Limits and retries](docs/limits.md) — guardrails and retry policy
 - [Security](docs/security.md) — auth model and demo-mode caveats
-- [Decisions](docs/adr/0001-async-batch-processing.md) — key trade-offs

@@ -186,5 +186,3 @@ one enqueue wins. Failed generation records `REPORT_GENERATION_FAILED` and allow
   rows (bounded by the row cap) keeps filters exact while analyses remain a fast per-file cache.
 - **Two worker pools:** report generation is CPU-heavy and bursty; keeping it off the file queue
   prevents a large workbook from delaying ingestion.
-
-See [ADR 0001](adr/0001-async-batch-processing.md) for the trade-offs considered.
