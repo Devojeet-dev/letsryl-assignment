@@ -150,30 +150,38 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       subscription.unsubscribe();
     };
   }, [signInWithToken]);
+  
   const signInWithGoogle = useCallback(async () => {
-    setError(null);
-    if (!supabase) {
-      setError(
-        'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
-      );
-      return;
-    }
-    // Clean origin without trailing slash matching standard Supabase redirect whitelist
-    const redirectUrl =
-      (import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined) ||
-      window.location.origin;
-    console.log('OAuth redirect URL:', redirectUrl);
-    console.log('Current origin:', window.location.origin);
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    if (oauthError) {
-      setError(oauthError.message);
-    }
-  }, []);
+  setError(null);
+
+  if (!supabase) {
+    setError(
+      'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+    );
+    return;
+  }
+
+  const redirectUrl =
+    import.meta.env.VITE_AUTH_REDIRECT_URL ||
+    window.location.origin;
+
+  console.log('OAuth Configuration:', {
+    origin: window.location.origin,
+    redirectUrl,
+    supabaseUrl: env.supabaseUrl,
+  });
+
+  const { error: oauthError } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: redirectUrl,
+    },
+  });
+
+  if (oauthError) {
+    setError(oauthError.message);
+  }
+}, []);
 
   const signOut = useCallback(async () => {
     setError(null);
