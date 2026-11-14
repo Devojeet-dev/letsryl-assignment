@@ -1,17 +1,43 @@
+# Dependencies
 node_modules/
+
+# Production builds & caches
 dist/
 build/
-coverage/
+.turbo/
+.vite/
 *.tsbuildinfo
+
+# Environment variables
 .env
 .env.local
 .env.*.local
 !.env.example
-.DS_Store
+
+# Logs & debugging
 *.log
-.turbo/
-.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing & coverage
+coverage/
 playwright-report/
 test-results/
+
+# Generated sample reports (keep baseline fixture)
 samples/reports/*.xlsx
 !samples/reports/sample-report.xlsx
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE & Editor settings
+.vscode/
+.idea/
+
+# Agent & spec workflows (local-only)
+.agents/
+openspec/
+
