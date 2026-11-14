@@ -161,8 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     }
     // Clean origin without trailing slash matching standard Supabase redirect whitelist
     const redirectUrl =
-      (import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined) ||
-      window.location.origin;
+      (import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined)
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
