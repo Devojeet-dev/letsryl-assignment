@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     };
   }, [signInWithToken]);
   
-  const signInWithGoogle = useCallback(async () => {
+const signInWithGoogle = useCallback(async () => {
   setError(null);
 
   if (!supabase) {
@@ -168,7 +168,6 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   console.log('OAuth Configuration:', {
     origin: window.location.origin,
     redirectUrl,
-    supabaseUrl: env.supabaseUrl,
   });
 
   const { error: oauthError } = await supabase.auth.signInWithOAuth({
