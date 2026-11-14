@@ -81,6 +81,16 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     bootstrapped.current = true;
 
     const bootstrap = async (): Promise<void> => {
+      // Check for OAuth error query params in URL
+      if (typeof window !== 'undefined' && window.location.search) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorDesc = urlParams.get('error_description') || urlParams.get('error');
+        if (errorDesc) {
+          setError(decodeURIComponent(errorDesc).replace(/\+/g, ' '));
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+
       const stored = readStoredSession();
       if (stored) {
         applySession(stored);
@@ -149,10 +159,16 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       );
       return;
     }
-    const redirectUrl = `${window.location.origin}/`;
+    // Clean origin without trailing slash matching standard Supabase redirect whitelist
+    const redirectUrl =
+      (import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined) ||
+      window.location.origin;
+
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: redirectUrl },
+      options: {
+        redirectTo: redirectUrl,
+      },
     });
     if (oauthError) {
       setError(oauthError.message);
