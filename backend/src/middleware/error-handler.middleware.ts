@@ -42,8 +42,18 @@ function mapMongoError(error: MongoLikeError): AppError | null {
 }
 
 /**
- * Terminal error middleware. Guarantees the documented error envelope and
- * ensures stack traces / driver messages never leave the process.
+ * Centralized terminal Express error handling middleware.
+ *
+ * Normalizes all domain errors, Zod validation issues, Multer upload errors,
+ * and uncaught exceptions into the standard JSON error envelope:
+ * `{ error: { code, message, requestId, details? } }`.
+ *
+ * Ensures internal database messages and stack traces never leak over the wire.
+ *
+ * @param error - The caught error object.
+ * @param req - The Express request context.
+ * @param res - The Express response object.
+ * @param _next - The Express next callback.
  */
 export function errorHandlerMiddleware(
   error: unknown,

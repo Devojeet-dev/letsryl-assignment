@@ -26,3 +26,10 @@ When running in development mode (`NODE_ENV !== 'production'`), the API middlewa
 #### Scenario: Preflight options request with custom headers
 - **WHEN** a browser issues a preflight `OPTIONS` request with `idempotency-key` and `authorization` headers from a local dev origin
 - **THEN** the API SHALL approve the preflight request with HTTP 204 and expose headers including `idempotent-replayed`
+
+### Requirement: Synchronized Development Port Configuration
+The local development environment documentation and configuration SHALL accurately reflect Vite dev server port configuration and avoid references to deleted monorepo paths.
+
+#### Scenario: Developer consults setup documentation
+- **WHEN** a developer inspects `README.md` and `.env.example`
+- **THEN** documented ports, CORS origins, and configuration paths SHALL match the active workspace layout without references to `apps/backend` or deleted packages

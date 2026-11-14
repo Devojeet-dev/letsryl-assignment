@@ -7,11 +7,13 @@ import { envSchema, type Env } from '../shared';
 const ENV_SEARCH_DEPTH = 2;
 
 /**
- * `npm run dev -w @bfdp/backend` starts in apps/backend, so it picks up
- * apps/backend/.env; a process launched from the repository root picks up the
- * root .env (the file compose reads). Searching upwards instead of assuming one
- * path keeps both entry points working without duplicating configuration.
- * ENV_FILE overrides the search.
+ * Resolves the active `.env` configuration file path.
+ *
+ * When started from `backend/`, picks up `backend/.env`; when launched from the
+ * repository root (e.g. by Docker or root scripts), it searches upwards to find
+ * the nearest `.env`. The `ENV_FILE` environment variable explicitly overrides this.
+ *
+ * @returns Absolute path to the resolved `.env` file, or undefined if none found.
  */
 function resolveEnvFile(): string | undefined {
   const explicit = process.env.ENV_FILE;

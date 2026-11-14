@@ -14,6 +14,13 @@ function requireUserId(req: Request): string {
   return req.auth.userId;
 }
 
+/**
+ * Retrieves the current status of Excel report generation for a batch (`GET /batches/:id/report/status`).
+ *
+ * @param req - Express request with batch ID and auth context.
+ * @param res - Express response returning HTTP 200 with report status (NOT_REQUESTED, QUEUED, GENERATING, READY, FAILED).
+ * @param next - Express next error handler callback.
+ */
 export async function getReportStatusController(
   req: Request,
   res: Response,
@@ -29,6 +36,13 @@ export async function getReportStatusController(
   }
 }
 
+/**
+ * Enqueues or retries background report generation for a completed batch (`POST /batches/:id/report`).
+ *
+ * @param req - Express request with batch ID and auth context.
+ * @param res - Express response returning HTTP 202 with the updated report status.
+ * @param next - Express next error handler callback.
+ */
 export async function requestReportController(
   req: Request,
   res: Response,
@@ -44,6 +58,17 @@ export async function requestReportController(
   }
 }
 
+/**
+ * Streams the generated multi-sheet Excel (.xlsx) workbook for a batch (`GET /batches/:id/report`).
+ *
+ * Verifies batch ownership and report readiness. If the report is still generating or failed,
+ * responds with appropriate HTTP 409 or 422 error states. If ready, pipes the GridFS file stream
+ * directly into the HTTP response.
+ *
+ * @param req - Express request with batch ID and auth context.
+ * @param res - Express response streaming the binary .xlsx workbook.
+ * @param next - Express next error handler callback.
+ */
 export async function downloadReportController(
   req: Request,
   res: Response,

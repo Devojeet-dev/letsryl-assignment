@@ -108,12 +108,12 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
             return;
           }
         } catch {
-          // continue to getSession fallback
+          // Token extraction from hash failed; fallback to Supabase session resolution.
         }
       }
 
-      // Returning from the Supabase OAuth redirect: exchange its access token
-      // for the API session (the API accepts Supabase JWTs directly).
+      // Returning from OAuth redirect: exchange its access token
+      // for the API session (the API accepts and verifies Supabase JWTs directly).
       if (supabase) {
         const { data } = await supabase.auth.getSession();
         if (data.session?.access_token) {
@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
         try {
           await signInWithToken(sbSession.access_token);
         } catch {
-          // Handled in bootstrap
+          // Fallback handled during bootstrap session evaluation.
         }
       }
     });

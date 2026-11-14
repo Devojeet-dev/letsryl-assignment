@@ -8,6 +8,17 @@ import {
 import { createBatch, getBatchDetail, listBatches } from './batch.service';
 import { assertUploadConstraints } from './policies/upload-limits.policy';
 
+/**
+ * Handles batch upload requests (`POST /batches`).
+ *
+ * Validates uploaded multipart files against upload limits (file count, size, extension),
+ * enforces idempotency keys if provided, persists files to GridFS, and enqueues individual
+ * file-processing jobs asynchronously.
+ *
+ * @param req - Express request containing uploaded files and auth context.
+ * @param res - Express response returning HTTP 202 with the initial BatchDetail payload.
+ * @param next - Express next error handler callback.
+ */
 export async function createBatchController(
   req: Request,
   res: Response,
@@ -39,6 +50,16 @@ export async function createBatchController(
   }
 }
 
+/**
+ * Retrieves the status, file details, and processing job states for a specific batch (`GET /batches/:id`).
+ *
+ * Enforces owner-scoped batch isolation, returning 404 NOT_FOUND if the batch does not exist or
+ * belongs to another user.
+ *
+ * @param req - Express request containing batch ID parameter and auth context.
+ * @param res - Express response returning HTTP 200 with complete BatchDetail.
+ * @param next - Express next error handler callback.
+ */
 export async function getBatchController(
   req: Request,
   res: Response,
@@ -56,6 +77,13 @@ export async function getBatchController(
   }
 }
 
+/**
+ * Lists all batches belonging to the authenticated user with pagination and status filters (`GET /batches`).
+ *
+ * @param req - Express request with pagination query parameters (page, limit, status).
+ * @param res - Express response returning HTTP 200 with paginated batch summaries.
+ * @param next - Express next error handler callback.
+ */
 export async function listBatchesController(
   req: Request,
   res: Response,

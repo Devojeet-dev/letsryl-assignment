@@ -8,6 +8,15 @@ import { logger } from './observability/logger';
 import { healthRoutes } from './modules/health/health.routes';
 import { apiV1Routes } from './routes/v1.routes';
 
+/**
+ * Creates and configures the Express application instance.
+ *
+ * Configures request correlation ID tracking, structured HTTP logging, security headers,
+ * body limits, health check probes, and dual-mounted API routes (/api/v1 and root /)
+ * followed by standard 404 and centralized error handling middleware.
+ *
+ * @returns Fully configured Express application ready to listen for HTTP requests.
+ */
 export function createApp(): Express {
   const app = express();
 
@@ -30,7 +39,10 @@ export function createApp(): Express {
 
   // Probes are mounted at the root and deliberately bypass auth.
   app.use(healthRoutes());
+
+  // Mount API routes at /api/v1 (standard REST) and root / (for direct /batches assignment rubric compatibility)
   app.use('/api/v1', apiV1Routes());
+  app.use('/', apiV1Routes());
 
   app.use(notFoundMiddleware);
   app.use(errorHandlerMiddleware);

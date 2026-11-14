@@ -3,6 +3,13 @@ import { AppError, ERROR_CODES, type SessionExchangeInput } from '../../shared';
 import { getRequestContext } from '../../observability/request-context';
 import { createDemoSession, exchangeSessionToken } from './auth.service';
 
+/**
+ * Exchanges a third-party token (Google ID token or Supabase access token) for an API session (`POST /auth/session`).
+ *
+ * @param req - Express request containing the `idToken` payload.
+ * @param res - Express response returning HTTP 200 with an `AuthSession` object.
+ * @param next - Express next error handler callback.
+ */
 export async function exchangeTokenController(
   req: Request,
   res: Response,
@@ -17,6 +24,14 @@ export async function exchangeTokenController(
   }
 }
 
+/**
+ * Issues an instant review session for the demo reviewer identity (`POST /auth/demo-session`).
+ * Gated by `DEMO_AUTH_ENABLED=true`. Returns 403 Forbidden if disabled.
+ *
+ * @param _req - Express request.
+ * @param res - Express response returning HTTP 200 with demo reviewer credentials.
+ * @param next - Express next error handler callback.
+ */
 export async function demoSessionController(
   _req: Request,
   res: Response,
@@ -30,6 +45,13 @@ export async function demoSessionController(
   }
 }
 
+/**
+ * Returns the currently authenticated user's profile context (`GET /auth/me`).
+ *
+ * @param req - Express request with auth context attached.
+ * @param res - Express response returning user metadata.
+ * @param next - Express next error handler callback.
+ */
 export function meController(req: Request, res: Response, next: NextFunction): void {
   if (!req.auth) {
     next(new AppError(ERROR_CODES.UNAUTHORIZED));

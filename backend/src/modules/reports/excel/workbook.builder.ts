@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import {
   ANALYSIS_CONSTANTS,
+  formatBytes,
   type BatchDetail,
   type DataQualityReport,
   type FieldStatistics,
@@ -82,12 +83,6 @@ function setWidths(ws: ExcelJS.Worksheet, widths: readonly number[]): void {
   widths.forEach((width, index) => {
     ws.getColumn(index + 1).width = width;
   });
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 function formatTimestamp(value: string | Date | null): string {

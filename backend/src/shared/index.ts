@@ -17,9 +17,6 @@ export * from './schemas/job.schema';
 export * from './schemas/pagination.schema';
 export * from './schemas/upload.schema';
 
-export * from './types/branded';
-export * from './types/result';
-
 export * from './utils/dates';
 export * from './utils/file-size';
 export * from './utils/guards';

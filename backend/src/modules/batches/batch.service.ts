@@ -15,6 +15,15 @@ import { IdempotencyKeyModel } from './models/idempotency-key.model';
 
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1_000;
 
+/**
+ * Sorts uploaded files in natural alphanumeric filename order.
+ *
+ * Ensures files like `transactions_02.csv` precede `transactions_10.csv`
+ * consistently across storage, queries, and UI displays.
+ *
+ * @param files - Array of uploaded file objects with `originalname`.
+ * @returns A new array sorted in natural ascending alphanumeric order.
+ */
 export function sortFilesNaturally<T extends { originalname: string }>(files: readonly T[]): T[] {
   return [...files].sort((a, b) =>
     a.originalname.localeCompare(b.originalname, undefined, { numeric: true, sensitivity: 'base' }),
@@ -32,6 +41,15 @@ export interface CreateBatchResult {
   replayed: boolean;
 }
 
+/**
+ * Fetches the full batch aggregate including associated files and job states.
+ * Enforces ownership access verification.
+ *
+ * @param batchId - The unique batch ID.
+ * @param ownerId - The ID of the authenticated user.
+ * @returns Fully populated BatchDetail aggregate.
+ * @throws {AppError} If the batch is not found or owned by a different user.
+ */
 export async function getBatchDetail(batchId: string, ownerId: string): Promise<BatchDetail> {
   const batch = await findOwnedBatch(batchId, ownerId);
   const [files, jobs] = await Promise.all([
@@ -200,6 +218,13 @@ export async function createBatch(input: CreateBatchInput): Promise<CreateBatchR
   return { batch: await getBatchDetail(batchId, ownerId), replayed: false };
 }
 
+/**
+ * Lists batches created by a specific owner with pagination and status filters.
+ *
+ * @param ownerId - The ID of the authenticated user.
+ * @param query - Pagination and filtering query parameters.
+ * @returns Paginated list of batch summaries with total count.
+ */
 export async function listBatches(
   ownerId: string,
   query: ListBatchesQuery,

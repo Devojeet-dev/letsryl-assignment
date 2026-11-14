@@ -5,9 +5,15 @@ import { logger } from '../observability/logger';
 import { config } from '../config';
 
 /**
- * Redis-backed fixed-window limiter. Fails open on Redis errors so a cache
- * outage degrades throughput rather than taking down the API; the outage is
- * still surfaced by /ready.
+ * Creates Redis-backed fixed-window rate limiting middleware.
+ *
+ * Tracks request counts per user (or client IP for unauthenticated routes).
+ * Sets `x-ratelimit-limit` and `x-ratelimit-remaining` response headers.
+ * Fails open on Redis connectivity issues to ensure API availability during cache hiccups
+ * (with warnings logged and readiness degraded).
+ *
+ * @returns Express rate limiting middleware function.
+ * @throws {AppError} 429 RATE_LIMITED with `retry-after` header when the window cap is exceeded.
  */
 export function rateLimitMiddleware() {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {

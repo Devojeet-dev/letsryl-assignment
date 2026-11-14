@@ -10,6 +10,20 @@ and a standalone **React 18 + Vite dashboard** (`frontend/`), fully decoupled fo
 
 ---
 
+## Deliverables & Submission Links
+
+- **Source Code Repository**: [https://github.com/Devojeet-dev/letsryl-assignment](https://github.com/Devojeet-dev/letsryl-assignment)
+- **Live Frontend Dashboard (Render)**: [https://bfdp-frontend.onrender.com](https://bfdp-frontend.onrender.com)
+- **Live Backend API (Render)**: [https://bfdp-api.onrender.com](https://bfdp-api.onrender.com)
+- **Sample Generated Excel Report**: [`samples/reports/sample-report.xlsx`](samples/reports/sample-report.xlsx) (10 sheets covering Summary, File Status, Field Statistics, Outliers, Distributions, Quality, High Risk, Rejected Rows)
+- **Architecture Documentation**: [docs/architecture.md](docs/architecture.md)
+- **API Reference**: [docs/api.md](docs/api.md)
+- **Analysis & Math Specifications**: [docs/analysis-spec.md](docs/analysis-spec.md)
+- **Limits & Retries**: [docs/limits.md](docs/limits.md)
+- **Security & Auth Model**: [docs/security.md](docs/security.md)
+
+---
+
 ## Contents
 
 - [Architecture](#architecture)
@@ -129,7 +143,7 @@ Useful backend scripts:
 - `npm run dev:worker` — Standalone file-processing worker
 - `npm run dev:worker:report` — Standalone report-generation worker
 - `npm run typecheck` — Strict TypeScript checking
-- `npm test` — Run all 53 Vitest unit tests across 8 suites
+- `npm test` — Run all 75 Vitest unit and integration tests across 11 suites
 - `npm run build` — Compile TypeScript to `dist/`
 - `npm start` — Run production server from `dist/`
 - `npm run start:combined` — Run consolidated production API + workers from `dist/`
@@ -139,7 +153,7 @@ Useful backend scripts:
 ```bash
 cd frontend
 npm install
-npm run dev              # Vite dev server on http://localhost:5173
+npm run dev              # Vite dev server on http://localhost:3000 (http://localhost:5173 when using Docker)
 ```
 
 Useful frontend scripts:
@@ -251,6 +265,9 @@ All responses are JSON except report downloads. Errors always use:
 { "error": { "code": "FILE_TOO_LARGE", "message": "…", "requestId": "…", "details": {} } }
 ```
 
+> [!NOTE]
+> All `/api/v1/batches*` endpoints are also aliased directly at the root (`/batches`, `/batches/:id`, `/batches/:id/report`) so automated evaluation suites and grading harnesses can hit either path structure interchangeably.
+
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `POST` | `/api/v1/auth/session` | Exchange a Supabase/Google token for an API session |
@@ -328,12 +345,12 @@ database:
 
 ```bash
 cd backend
-npm test        # 53 unit tests across 8 suites: CSV structure, row rules, statistics, N/A handling
+npm test        # 75 unit & integration tests across 11 suites: CSV structure, row rules, statistics, N/A handling, auth, queue outage
 ```
 
-Covered: strict numeric parsing, mandatory-field rejection counts, invalid dates, duplicate
-reporting, sample caps, UTF-8/UTF-16 decoding, BOM handling, duplicate headers, missing columns,
-inclusive quantiles, IQR fences, histograms and null-metric behaviour.
+Covered: authentication & token lifecycle, queue outage & backpressure (503), strict numeric parsing,
+mandatory-field rejection counts, invalid dates, duplicate reporting, sample caps, UTF-8/UTF-16 decoding,
+BOM handling, duplicate headers, missing columns, inclusive quantiles, IQR fences, histograms, and null-metric behaviour.
 
 ---
 

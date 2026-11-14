@@ -9,6 +9,9 @@ export interface ApiErrorBody {
   };
 }
 
+/**
+ * Standard HTTP API error thrown by client fetch operations.
+ */
 export class ApiError extends Error {
   readonly code: string;
   readonly status: number;
@@ -27,7 +30,12 @@ export class ApiError extends Error {
 
 let accessToken: string | null = null;
 
-/** The auth provider keeps this in sync with the active session. */
+/**
+ * Updates the global in-memory access token used for authenticated API calls.
+ * Kept in sync by the AuthProvider.
+ *
+ * @param token - Bearer JWT token string or null when unauthenticated.
+ */
 export function setAccessToken(token: string | null): void {
   accessToken = token;
 }
@@ -49,6 +57,16 @@ async function parseError(response: Response): Promise<ApiError> {
   return new ApiError(body, response.status);
 }
 
+/**
+ * Executes a typed HTTP JSON request against the backend API.
+ * Automatically injects the Authorization header when logged in.
+ *
+ * @template T - The expected JSON response type.
+ * @param path - API path relative to the base URL (e.g. '/batches').
+ * @param init - Optional RequestInit settings including query parameters.
+ * @returns Parsed JSON response body.
+ * @throws {ApiError} If the server responds with a non-2xx status code.
+ */
 export async function apiRequest<T>(
   path: string,
   init: RequestInit & { query?: Record<string, string | number | undefined> } = {},
@@ -77,7 +95,13 @@ export interface DownloadedFile {
   fileName: string;
 }
 
-/** Authenticated binary download; the SPA cannot rely on a bare anchor href. */
+/**
+ * Downloads a binary file (such as an Excel report) with Bearer token authentication.
+ *
+ * @param path - The download URL path.
+ * @returns Object containing the downloaded Blob and extracted fileName.
+ * @throws {ApiError} If the download fails or is not ready.
+ */
 export async function apiDownload(path: string): Promise<DownloadedFile> {
   const headers = new Headers();
   if (accessToken) {
